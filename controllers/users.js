@@ -8,18 +8,18 @@ const auth = require('../auth');
 // Register user
 module.exports.registerUser = (req, res) => {
 	if(!req.body.email.includes('@')) {
-		return res.status(400).send({message : 'Invalid email format'})
+		return res.status(200).send({message : 'Invalid email format'})
 	}
 
 	if(req.body.password.length < 8){
-		return res.status(400).send({ message: 'Password must be at least 8 characters' });
+		return res.status(200).send({ message: 'Password must be at least 8 characters' });
 	}
 
 	// Checking if email is already registered and if so, early exit
 	User.findOne({email : req.body.email })
 	.then(existingUser => {
 		if(existingUser){
-			return res.status(409).send({ message: 'Email Already Exists' });
+			return res.status(200).send({ message: 'Email Already Exists' });
 		}
 	
 
@@ -43,13 +43,13 @@ module.exports.loginUser = (req, res) => {
 	User.findOne({ email: req.body.email })
 		.then(user => {
 			if (!user) {
-				return res.status(404).send({ message: 'User not found' });
+				return res.status(200).send({ message: 'User not found' });
 			}
 
 			const isPasswordCorrect = bcrypt.compareSync(req.body.password, user.password);
 
 			if (!isPasswordCorrect) {
-				return res.status(401).send({ message: 'Incorrect password' });
+				return res.status(200).send({ message: 'Incorrect password' });
 			}
 
 			res.status(200).send({
@@ -65,7 +65,7 @@ module.exports.getProfile = (req, res) => {
     .select('-password')
     .then(user => {
       if (!user) {
-        return res.status(404).send({ message: 'User not found' });
+        return res.status(200).send({ message: 'User not found' });
       }
       res.status(200).send(user);
     })

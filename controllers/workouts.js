@@ -49,8 +49,9 @@ module.exports.updateWorkout = (req, res) => {
     const workoutId = req.params.workoutId;
     const { name, duration } = req.body;
 
-    Workout.findByIdAndUpdate(
-        workoutId,
+    // Only allow the user to update their own workouts
+    Workout.findOneAndUpdate(
+        { _id: workoutId, userId: req.user.id },
         { name, duration },
         { new: true }
     )
@@ -72,15 +73,15 @@ module.exports.updateWorkout = (req, res) => {
             }
         });
     })
-    .catch(error => errorHandler(error, req, res));
+    .catch(error => auth.errorHandler(error, req, res));
 };
-
 
 // Delete a workout
 module.exports.deleteWorkout = (req, res) => {
     const workoutId = req.params.workoutId;
 
-    Workout.findOneAndDelete(workoutId)
+    //
+    Workout.findOneAndDelete({ _id: workoutId, userId: req.user.id })
     .then(deletedWorkout => {
         if (!deletedWorkout) {
             return res.status(404).json({ message: 'Workout not found' });
@@ -94,9 +95,11 @@ module.exports.deleteWorkout = (req, res) => {
 module.exports.completeWorkoutStatus = (req, res) => {
     const workoutId = req.params.workoutId;
 
-    Workout.findByIdAndUpdate(workoutId,{ 
-        status: 'completed' 
-    }, { new: true }
+    // Only allow the user to update their own workouts
+    Workout.findOneAndUpdate(
+        { _id: workoutId, userId: req.user.id },
+        { status: 'completed' }, 
+        { new: true }
     )
     .then(updatedWorkout => {
         if (!updatedWorkout) {
@@ -116,8 +119,5 @@ module.exports.completeWorkoutStatus = (req, res) => {
             }
         });
     })
-    .catch(error => errorHandler(error, req, res));
+    .catch(error => auth.errorHandler(error, req, res));
 };
-
-
-
